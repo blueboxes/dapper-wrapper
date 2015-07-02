@@ -43,6 +43,25 @@ public class DependenciesRegistrar : NinjectModule {
 }
 ```
 
+Example of binding `IDbExecutor` and `IDbExecutorFactory` using AutoFac:
+
+```
+public class DependenciesRegistrar : Module
+{
+        protected override void Load(ContainerBuilder builder)
+        {
+            builder.Register(a =>
+            {
+                var sqlConnection = new SqlConnection(connectionString);
+                sqlConnection.Open();
+                return new SqlExecutor(sqlConnection);
+            }).As<IDbExecutor>();
+
+            builder.Register(a => new SqlExecutorFactory(connectionString)).As<IDbExecutorFactory>().SingleInstance();
+        }
+}
+```
+
 ## Transactions
 
 I sometimes need to assert whether a method-under-unit-test completes a transaction via `TransactionScope`. To make this easier, DapperWrapper also has an `ITransactionScope` interface (and `TransactionScopeWrapper` implementation) that makes it easy to create a fake transaction, and stub (and assert on) the `Complete` method. As with `IDbExecutor`, you can bind it directly, via `Func<ITransactionScope>`.
